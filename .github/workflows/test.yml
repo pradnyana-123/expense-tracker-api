@@ -8,6 +8,9 @@ jobs:
   runIntegrationTest:
     runs-on: ubuntu-latest
 
+    env:
+      DATABASE_URL: 'postgresql://andika:pradnyana123@localhost:5432/expense'
+
     services:
       postgres:
         image: postgres:15
@@ -34,8 +37,6 @@ jobs:
 
       - name: Generate Prisma Client
         run: npx prisma generate
-        env:
-          DATABASE_URL: 'postgresql://andika:pradnyana123@localhost:5432/expense'
 
       - name: Type Check
         run: npx tsc --noEmit
