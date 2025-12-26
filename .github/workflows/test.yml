@@ -9,15 +9,15 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      DATABASE_URL: 'postgresql://andika:pradnyana123@localhost:5432/expense'
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
 
     services:
       postgres:
         image: postgres:15
         env:
-          POSTGRES_USER: andika
-          POSTGRES_PASSWORD: 'pradnyana123'
-          POSTGRES_DB: expense
+          POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+          POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
         ports:
           - 5432:5432
         options: >-
@@ -31,6 +31,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
+          cache: 'npm'
 
       - name: Install Dependencies
         run: npm ci
