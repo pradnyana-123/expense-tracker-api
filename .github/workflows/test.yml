@@ -12,8 +12,8 @@ jobs:
       postgres:
         image: postgres:15
         env:
-          POSTGRES_USER: user_test
-          POSTGRES_PASSWORD: password_test
+          POSTGRES_USER: andika
+          POSTGRES_PASSWORD: pradnyana123
           POSTGRES_DB: expense
         ports:
           - 5432:5432
