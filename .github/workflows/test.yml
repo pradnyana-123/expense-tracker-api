@@ -12,9 +12,9 @@ jobs:
       postgres:
         image: postgres:15
         env:
-          POSTGRES_USER: andika
-          POSTGRES_PASSWORD: pradnyana123
-          POSTGRES_DB: expense
+          POSTGRES_USER: 'andika'
+          POSTGRES_PASSWORD: 'pradnyana123'
+          POSTGRES_DB: 'expense'
         ports:
           - 5432:5432
         options: >-
