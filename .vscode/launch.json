@@ -1,0 +1,23 @@
+{
+  // Use IntelliSense to learn about possible attributes.
+  // Hover to view descriptions of existing attributes.
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Debug TS in WSL",
+      "type": "node",
+      "request": "launch",
+      "runtimeArgs": ["run", "start:debug"],
+      "sourceMaps": true,
+      "runtimeExecutable": "/home/andika/.nvm/versions/node/v22.14.0/bin/npm",
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+      "stopOnEntry": true,
+      "cwd": "${workspaceFolder}"
+      //   "env": {
+      //     "PATH": "/home/andika/.nvm/versions/node/22.14.0/bin:/usr/local/bin:/usr/bin:/bin"
+      //   }
+    }
+  ]
+}
