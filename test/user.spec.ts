@@ -25,7 +25,7 @@ describe('UserController (Integration)', () => {
     await app.init();
   });
 
-  // Cleanup setelah testing selesai
+
   afterAll(async () => {
     await app.close();
   });
@@ -57,7 +57,7 @@ describe('UserController (Integration)', () => {
     it('should return 400 Bad Request if payload is invalid', async () => {
       const invalidPayload = {
         username: '',
-        password: '', // Asumsi DTO memvalidasi format email
+        password: '', 
       };
 
       const response = await request
