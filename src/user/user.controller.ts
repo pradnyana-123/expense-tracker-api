@@ -13,4 +13,11 @@ export class UserController {
 
     return result;
   }
+
+  @Get()
+  async getAll() {
+    const result = await this.userService.getUsers();
+
+    return result;
+  }
 }

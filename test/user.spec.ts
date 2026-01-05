@@ -25,19 +25,15 @@ describe('UserController (Integration)', () => {
     await app.init();
   });
 
-
   afterAll(async () => {
     await app.close();
   });
 
-  describe('api/users (POST)', () => {
+  describe('POST /api/users', () => {
     beforeEach(async () => {
       await testService.deleteAll();
     });
 
-    afterEach(async () => {
-      await testService.deleteAll();
-    });
     it('should successfully create a new user and return 201', async () => {
       const payload: CreateUserDTO = {
         username: 'test user',
@@ -57,7 +53,7 @@ describe('UserController (Integration)', () => {
     it('should return 400 Bad Request if payload is invalid', async () => {
       const invalidPayload = {
         username: '',
-        password: '', 
+        password: '',
       };
 
       const response = await request
@@ -67,6 +63,42 @@ describe('UserController (Integration)', () => {
 
       expect(response.status).toBe(400);
       expect(response.body).toBeDefined();
+    });
+  });
+
+  describe('GET /api/users', () => {
+    beforeEach(async () => {
+      await testService.deleteAll();
+    });
+
+    it('should return users successfully', async () => {
+      // Create test data
+      await testService.createUser({
+        username: 'user1',
+        password: 'password123',
+      });
+      await testService.createUser({
+        username: 'user2',
+        password: 'password456',
+      });
+
+      const response = await request
+        .default(app.getHttpServer())
+        .get('/api/users');
+
+      expect(response.status).toBe(200);
+      expect(response.body.length).toBeGreaterThan(1);
+      expect(response.body[0].username).toBe('user1');
+      expect(response.body[1].username).toBe('user2');
+    });
+
+    it('should return empty array when no users exist', async () => {
+      const response = await request
+        .default(app.getHttpServer())
+        .get('/api/users');
+
+      expect(response.status).toBe(200);
+      expect(response.body).toEqual([]);
     });
   });
 });

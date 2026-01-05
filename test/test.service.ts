@@ -9,6 +9,11 @@ export class TestService {
     await this.deleteExpense();
     await this.deleteCategory();
     await this.deleteUser();
+    await this.deleteAllUser();
+  }
+
+  async deleteAllUser() {
+    return this.prisma.user.deleteMany();
   }
 
   async deleteUser() {
@@ -30,6 +35,12 @@ export class TestService {
   async deleteExpense() {
     await this.prisma.expense.deleteMany({
       where: { description: 'test description' },
+    });
+  }
+
+  async createUser(userData: { username: string; password: string }) {
+    return this.prisma.user.create({
+      data: userData,
     });
   }
 }
