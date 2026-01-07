@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ForbiddenException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -15,6 +16,7 @@ export class CategoryService {
     const categoryExist = await this.prisma.category.findFirst({
       where: {
         name: data.name,
+        userId: userId,
       },
     });
 
@@ -57,8 +59,14 @@ export class CategoryService {
       throw new NotFoundException('Category not found');
     }
 
+    if (categoryExistOrNot.userId !== userId) {
+      throw new ForbiddenException(
+        'You are not allowed to update this category',
+      );
+    }
+
     const category = await this.prisma.category.update({
-      where: { id: categoryId, userId },
+      where: { id: categoryId },
       data: {
         ...data,
       },
@@ -69,5 +77,29 @@ export class CategoryService {
     });
 
     return category;
+  }
+
+  async deleteCategory(userId: number, categoryId: number) {
+    const categoryExistOrNot = await this.prisma.category.findUnique({
+      where: { id: categoryId },
+    });
+
+    if (!categoryExistOrNot) {
+      throw new NotFoundException('Category not found');
+    }
+
+    if (categoryExistOrNot.userId !== userId) {
+      throw new ForbiddenException(
+        'You are not allowed to delete this category',
+      );
+    }
+
+    await this.prisma.category.delete({
+      where: { id: categoryId, userId },
+    });
+
+    return {
+      message: 'Category deleted successfully',
+    };
   }
 }

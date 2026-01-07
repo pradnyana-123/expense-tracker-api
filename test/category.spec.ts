@@ -231,5 +231,121 @@ describe('CategoryController (Integration)', () => {
 
       expect(response.status).toBe(404);
     });
+
+    it('should return 403 Forbidden if trying to update another user category', async () => {
+      // Create two users
+      const user1 = await testService.createUser({
+        username: 'test user 1',
+        password: 'password123',
+      });
+
+      const user2 = await testService.createUser({
+        username: 'test user 2',
+        password: 'password123',
+      });
+
+      // Create category for user1
+      const category = await testService.createCategory({
+        name: 'Food',
+        userId: user1.id,
+      });
+
+      // Try to update user1's category with user2's userId
+      const response = await request
+        .default(app.getHttpServer())
+        .patch(`/api/categories/${user2.id}/${category.id}`)
+        .send({ name: 'Updated Name' });
+
+      expect(response.status).toBe(403);
+    });
+  });
+
+  describe('DELETE /api/categories/:userId/:categoryId', () => {
+    beforeEach(async () => {
+      await testService.deleteAll();
+    });
+
+    it('should successfully delete a category and return 200', async () => {
+      // Create a user first
+      const user = await testService.createUser({
+        username: 'test user',
+        password: 'password123',
+      });
+
+      // Create a category to delete
+      const category = await testService.createCategory({
+        name: 'Food',
+        userId: user.id,
+      });
+
+      const response = await request
+        .default(app.getHttpServer())
+        .delete(`/api/categories/${user.id}/${category.id}`);
+
+      expect(response.status).toBe(200);
+      expect(response.body.message).toBeDefined();
+
+      // Verify category is deleted
+      const getResponse = await request
+        .default(app.getHttpServer())
+        .get(`/api/categories/${user.id}`);
+
+      expect(getResponse.body.categories.length).toBe(0);
+    });
+
+    it('should return 400 Bad Request if userId is not a number', async () => {
+      const response = await request
+        .default(app.getHttpServer())
+        .delete('/api/categories/invalid/1');
+
+      expect(response.status).toBe(400);
+    });
+
+    it('should return 400 Bad Request if categoryId is not a number', async () => {
+      const response = await request
+        .default(app.getHttpServer())
+        .delete('/api/categories/1/invalid');
+
+      expect(response.status).toBe(400);
+    });
+
+    it('should return 404 Not Found if category does not exist', async () => {
+      const user = await testService.createUser({
+        username: 'test user',
+        password: 'password123',
+      });
+
+      const response = await request
+        .default(app.getHttpServer())
+        .delete(`/api/categories/${user.id}/999`);
+
+      expect(response.status).toBe(404);
+    });
+
+    it('should return 403 Forbidden if trying to delete another user category', async () => {
+      // Create two users
+      const user1 = await testService.createUser({
+        username: 'test user 1',
+        password: 'password123',
+      });
+
+      const user2 = await testService.createUser({
+        username: 'test user 2',
+        password: 'password123',
+      });
+
+      // Create category for user1
+      const category = await testService.createCategory({
+        name: 'Food',
+        userId: user1.id,
+      });
+
+      // Try to delete user1's category with user2's userId
+      const response = await request
+        .default(app.getHttpServer())
+        .delete(`/api/categories/${user2.id}/${category.id}`);
+
+      expect(response.status).toBe(403);
+    });
   });
 });

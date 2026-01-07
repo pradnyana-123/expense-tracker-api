@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpCode,
   Param,
@@ -48,6 +49,20 @@ export class CategoryController {
       categoryId,
       userId,
       data,
+    );
+
+    return result;
+  }
+
+  @Delete(':userId/:categoryId')
+  @HttpCode(200)
+  async delete(
+    @Param('userId', ParseIntPipe) userId: number,
+    @Param('categoryId', ParseIntPipe) categoryId: number,
+  ) {
+    const result = await this.categoryService.deleteCategory(
+      userId,
+      categoryId,
     );
 
     return result;
