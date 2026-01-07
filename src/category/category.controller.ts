@@ -5,10 +5,12 @@ import {
   HttpCode,
   Param,
   ParseIntPipe,
+  Patch,
   Post,
 } from '@nestjs/common';
 import { CategoryService } from './category.service';
 import { CreateCategoryDTO } from 'src/dto/create-category.dto';
+import { UpdateCategoryDTO } from 'src/dto/update-category.dto';
 
 @Controller('api/categories')
 export class CategoryController {
@@ -33,5 +35,21 @@ export class CategoryController {
     return {
       categories: result,
     };
+  }
+
+  @Patch(':userId/:categoryId')
+  @HttpCode(200)
+  async update(
+    @Body() data: UpdateCategoryDTO,
+    @Param('userId', ParseIntPipe) userId: number,
+    @Param('categoryId', ParseIntPipe) categoryId: number,
+  ) {
+    const result = await this.categoryService.updateCategory(
+      categoryId,
+      userId,
+      data,
+    );
+
+    return result;
   }
 }

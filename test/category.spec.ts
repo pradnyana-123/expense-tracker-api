@@ -144,4 +144,92 @@ describe('CategoryController (Integration)', () => {
       expect(response.status).toBe(400);
     });
   });
+
+  describe('PATCH /api/categories/:userId/:categoryId', () => {
+    beforeEach(async () => {
+      await testService.deleteAll();
+    });
+
+    it('should successfully update a category and return 200', async () => {
+      // Create a user first
+      const user = await testService.createUser({
+        username: 'test user',
+        password: 'password123',
+      });
+
+      // Create a category to update
+      const category = await testService.createCategory({
+        name: 'Food',
+        userId: user.id,
+      });
+
+      const updateData = {
+        name: 'Food & Dining',
+      };
+
+      const response = await request
+        .default(app.getHttpServer())
+        .patch(`/api/categories/${user.id}/${category.id}`)
+        .send(updateData);
+
+      expect(response.status).toBe(200);
+      expect(response.body.id).toBe(category.id);
+      expect(response.body.name).toBe('Food & Dining');
+    });
+
+    it('should return 400 Bad Request if payload is invalid', async () => {
+      const user = await testService.createUser({
+        username: 'test user',
+        password: 'password123',
+      });
+
+      const category = await testService.createCategory({
+        name: 'Food',
+        userId: user.id,
+      });
+
+      const invalidPayload = {
+        name: '',
+      };
+
+      const response = await request
+        .default(app.getHttpServer())
+        .patch(`/api/categories/${user.id}/${category.id}`)
+        .send(invalidPayload);
+
+      expect(response.status).toBe(400);
+    });
+
+    it('should return 400 Bad Request if userId is not a number', async () => {
+      const response = await request
+        .default(app.getHttpServer())
+        .patch('/api/categories/invalid/1')
+        .send({ name: 'Updated Name' });
+
+      expect(response.status).toBe(400);
+    });
+
+    it('should return 400 Bad Request if categoryId is not a number', async () => {
+      const response = await request
+        .default(app.getHttpServer())
+        .patch('/api/categories/1/invalid')
+        .send({ name: 'Updated Name' });
+
+      expect(response.status).toBe(400);
+    });
+
+    it('should return 404 Not Found if category does not exist', async () => {
+      const user = await testService.createUser({
+        username: 'test user',
+        password: 'password123',
+      });
+
+      const response = await request
+        .default(app.getHttpServer())
+        .patch(`/api/categories/${user.id}/999`)
+        .send({ name: 'Updated Name' });
+
+      expect(response.status).toBe(404);
+    });
+  });
 });
