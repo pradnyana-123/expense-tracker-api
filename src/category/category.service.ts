@@ -26,4 +26,16 @@ export class CategoryService {
 
     return category;
   }
+
+  async getAllCategories(userId: number) {
+    return this.prisma.category.findMany({
+      where: {
+        userId: userId,
+      },
+      select: {
+        id: true,
+        name: true,
+      },
+    });
+  }
 }

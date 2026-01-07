@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Get,
   HttpCode,
   Param,
   ParseIntPipe,
@@ -22,5 +23,15 @@ export class CategoryController {
     const result = await this.categoryService.createCategory(data, userId);
 
     return result;
+  }
+
+  @Get(':userId')
+  @HttpCode(200)
+  async getAll(@Param('userId', ParseIntPipe) userId: number) {
+    const result = await this.categoryService.getAllCategories(userId);
+
+    return {
+      categories: result,
+    };
   }
 }
