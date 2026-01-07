@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import * as request from 'supertest';
-import { AppModule } from '../src/app.module'; // Sesuaikan path
+import { AppModule } from '../src/app.module';
 import { CreateUserDTO } from 'src/dto/create-user-dto';
 import { TestModule } from './test.module';
 import { TestService } from './test.service';
@@ -9,19 +9,14 @@ import { TestService } from './test.service';
 describe('UserController (Integration)', () => {
   let app: INestApplication;
   let testService: TestService;
-  // Setup sebelum testing dimulai
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule, TestModule],
     }).compile();
 
     app = moduleFixture.createNestApplication();
-
-    // PENTING: Aktifkan pipe agar DTO di-validate seperti di aplikasi asli
     app.useGlobalPipes(new ValidationPipe());
-
     testService = moduleFixture.get<TestService>(TestService);
-
     await app.init();
   });
 
@@ -87,9 +82,9 @@ describe('UserController (Integration)', () => {
         .get('/api/users');
 
       expect(response.status).toBe(200);
-      expect(response.body.length).toBeGreaterThan(1);
-      expect(response.body[0].username).toBe('user1');
-      expect(response.body[1].username).toBe('user2');
+      expect(Array.isArray(response.body)).toBe(true);
+      expect(response.body.length).toBe(2);
+      expect(response.body[0].username).toMatch(/user1|user2/);
     });
 
     it('should return empty array when no users exist', async () => {

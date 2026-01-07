@@ -6,35 +6,11 @@ export class TestService {
   constructor(private prisma: PrismaService) {}
 
   async deleteAll() {
-    await this.deleteExpense();
-    await this.deleteAllCategory();
-    await this.deleteCategory();
-    await this.deleteUser();
-    await this.deleteAllUser();
-  }
-
-  async deleteAllUser() {
-    return this.prisma.user.deleteMany();
-  }
-
-  async deleteUser() {
-    await this.prisma.user.deleteMany({
-      where: {
-        username: 'test user',
-      },
+    await this.prisma.$transaction(async (tx) => {
+      await tx.expense.deleteMany();
+      await tx.category.deleteMany();
+      await tx.user.deleteMany();
     });
-  }
-
-  async deleteCategory() {
-    await this.prisma.category.deleteMany({
-      where: {
-        name: 'test category',
-      },
-    });
-  }
-
-  async deleteAllCategory() {
-    await this.prisma.category.deleteMany();
   }
 
   async deleteExpense() {
@@ -44,14 +20,30 @@ export class TestService {
   }
 
   async createUser(userData: { username: string; password: string }) {
+    const bcrypt = require('bcrypt');
+    const hashedPassword = await bcrypt.hash(userData.password, 10);
+
+    // Create unique username to avoid conflicts
+    const uniqueUsername = `${userData.username}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+
     return this.prisma.user.create({
-      data: userData,
+      data: {
+        ...userData,
+        username: uniqueUsername,
+        password: hashedPassword,
+      },
     });
   }
 
   async createCategory(categoryData: { name: string; userId: number }) {
+    // Create unique category name to avoid conflicts
+    const uniqueName = `${categoryData.name}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+
     return this.prisma.category.create({
-      data: categoryData,
+      data: {
+        ...categoryData,
+        name: uniqueName,
+      },
     });
   }
 }
