@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import * as request from 'supertest';
 import { AppModule } from '../src/app.module'; // Sesuaikan path
-import { CreateUserDTO } from 'src/dto/user-dto';
+import { CreateUserDTO } from 'src/dto/create-user-dto';
 import { TestModule } from './test.module';
 import { TestService } from './test.service';
 
