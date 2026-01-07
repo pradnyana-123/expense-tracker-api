@@ -38,7 +38,7 @@ describe('CategoryController (Integration)', () => {
       });
 
       const payload: CreateCategoryDTO = {
-        name: 'Food',
+        name: 'test category',
       };
 
       const response = await request
@@ -48,7 +48,7 @@ describe('CategoryController (Integration)', () => {
 
       expect(response.status).toBe(201);
       expect(response.body.id).toBeDefined();
-      expect(response.body.name).toBe('Food');
+      expect(response.body.name).toBe('test category');
     });
 
     it('should return 400 Bad Request if payload is invalid', async () => {
@@ -73,7 +73,7 @@ describe('CategoryController (Integration)', () => {
 
     it('should return 400 Bad Request if userId is not a number', async () => {
       const payload: CreateCategoryDTO = {
-        name: 'Food',
+        name: 'test category',
       };
 
       const response = await request
