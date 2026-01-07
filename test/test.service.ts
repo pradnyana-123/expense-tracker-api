@@ -7,6 +7,7 @@ export class TestService {
 
   async deleteAll() {
     await this.deleteExpense();
+    await this.deleteAllCategory();
     await this.deleteCategory();
     await this.deleteUser();
     await this.deleteAllUser();
@@ -32,6 +33,10 @@ export class TestService {
     });
   }
 
+  async deleteAllCategory() {
+    await this.prisma.category.deleteMany();
+  }
+
   async deleteExpense() {
     await this.prisma.expense.deleteMany({
       where: { description: 'test description' },
@@ -41,6 +46,12 @@ export class TestService {
   async createUser(userData: { username: string; password: string }) {
     return this.prisma.user.create({
       data: userData,
+    });
+  }
+
+  async createCategory(categoryData: { name: string; userId: number }) {
+    return this.prisma.category.create({
+      data: categoryData,
     });
   }
 }

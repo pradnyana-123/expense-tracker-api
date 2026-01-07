@@ -84,4 +84,64 @@ describe('CategoryController (Integration)', () => {
       expect(response.status).toBe(400);
     });
   });
+
+  describe('GET /api/categories/:userId', () => {
+    beforeEach(async () => {
+      await testService.deleteAll();
+    });
+
+    it('should successfully get all categories for a user and return 200', async () => {
+      // Create a user first
+      const user = await testService.createUser({
+        username: 'test user',
+        password: 'password123',
+      });
+
+      // Create some categories for the user
+      await testService.createCategory({
+        name: 'Food',
+        userId: user.id,
+      });
+
+      await testService.createCategory({
+        name: 'Transport',
+        userId: user.id,
+      });
+
+      const response = await request
+        .default(app.getHttpServer())
+        .get(`/api/categories/${user.id}`);
+
+      expect(response.status).toBe(200);
+      expect(response.body.categories).toBeDefined();
+      expect(Array.isArray(response.body.categories)).toBe(true);
+      expect(response.body.categories.length).toBe(2);
+      expect(response.body.categories[0].name).toMatch(/Food|Transport/);
+    });
+
+    it('should return empty array when user has no categories', async () => {
+      // Create a user first
+      const user = await testService.createUser({
+        username: 'test user',
+        password: 'password123',
+      });
+
+      const response = await request
+        .default(app.getHttpServer())
+        .get(`/api/categories/${user.id}`);
+
+      expect(response.status).toBe(200);
+      expect(response.body.categories).toBeDefined();
+      expect(Array.isArray(response.body.categories)).toBe(true);
+      expect(response.body.categories.length).toBe(0);
+    });
+
+    it('should return 400 Bad Request if userId is not a number', async () => {
+      const response = await request
+        .default(app.getHttpServer())
+        .get('/api/categories/invalid');
+
+      expect(response.status).toBe(400);
+    });
+  });
 });
