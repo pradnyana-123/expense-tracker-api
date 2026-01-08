@@ -6,7 +6,7 @@ import { CreateUserDTO } from 'src/dto/create-user-dto';
 import { TestModule } from './test.module';
 import { TestService } from './test.service';
 
-describe('UserController (Integration)', () => {
+describe('UserController', () => {
   let app: INestApplication;
   let testService: TestService;
   beforeAll(async () => {
