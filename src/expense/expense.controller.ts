@@ -5,10 +5,12 @@ import {
   HttpCode,
   Param,
   ParseIntPipe,
+  Patch,
   Post,
 } from '@nestjs/common';
 import { ExpenseService } from './expense.service';
 import { CreateExpenseDTO } from 'src/dto/create-expense.dto';
+import { UpdateExpenseDTO } from 'src/dto/update-expense.dto';
 
 @Controller('api/expense')
 export class ExpenseController {
@@ -29,6 +31,22 @@ export class ExpenseController {
   @HttpCode(200)
   async getAll(@Param('userId', ParseIntPipe) userId: number) {
     const result = await this.expenseService.getAllExpenses(userId);
+
+    return result;
+  }
+
+  @Patch(':userId/:expenseId')
+  @HttpCode(200)
+  async update(
+    @Param('userId', ParseIntPipe) userId: number,
+    @Param('expenseId', ParseIntPipe) expenseId: number,
+    @Body() data: UpdateExpenseDTO,
+  ) {
+    const result = await this.expenseService.updateExpense(
+      userId,
+      expenseId,
+      data,
+    );
 
     return result;
   }
