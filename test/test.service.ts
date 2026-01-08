@@ -6,11 +6,9 @@ export class TestService {
   constructor(private prisma: PrismaService) {}
 
   async deleteAll() {
-    await this.prisma.$transaction(async (tx) => {
-      await tx.expense.deleteMany();
-      await tx.category.deleteMany();
-      await tx.user.deleteMany();
-    });
+    await this.prisma.expense.deleteMany();
+    await this.prisma.category.deleteMany();
+    await this.prisma.user.deleteMany();
   }
 
   async deleteExpense() {
