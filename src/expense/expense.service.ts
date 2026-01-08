@@ -7,7 +7,6 @@ import { PrismaService } from 'src/common/prisma.service';
 import { CreateExpenseDTO } from 'src/dto/create-expense.dto';
 import { Prisma } from '../../generated/prisma/browser';
 import { UpdateExpenseDTO } from 'src/dto/update-expense.dto';
-import { Decimal } from '../../generated/prisma/internal/prismaNamespace';
 @Injectable()
 export class ExpenseService {
   constructor(private prisma: PrismaService) {}
@@ -18,7 +17,7 @@ export class ExpenseService {
     });
 
     if (!userExistOrNot) {
-      throw new NotFoundException('User not found');
+      throw new NotFoundException("User not found");
     }
 
     const normalizedAmount = new Prisma.Decimal(
@@ -48,7 +47,7 @@ export class ExpenseService {
     });
 
     if (!userExistOrNot) {
-      throw new NotFoundException('User not found');
+      throw new NotFoundException("User not found");
     }
 
     return this.prisma.expense.findMany({
@@ -66,12 +65,12 @@ export class ExpenseService {
     });
 
     if (!expenseExistOrNot) {
-      throw new NotFoundException('Expense not found');
+      throw new NotFoundException("Expense not found");
     }
 
     if (expenseExistOrNot.userId !== userId) {
       throw new ForbiddenException(
-        'You are not allowed to update this expense',
+        "You are not allowed to update this expense",
       );
     }
 
@@ -101,12 +100,12 @@ export class ExpenseService {
     });
 
     if (!expenseExistOrNot) {
-      throw new NotFoundException('Expense not found');
+      throw new NotFoundException("Expense not found");
     }
 
     if (expenseExistOrNot.userId !== userId) {
       throw new ForbiddenException(
-        'You are not allowed to update this expense',
+       "You are not allowed to update this expense",
       );
     }
 
