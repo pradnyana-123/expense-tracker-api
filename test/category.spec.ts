@@ -6,7 +6,7 @@ import { CreateCategoryDTO } from 'src/dto/create-category.dto';
 import { TestModule } from './test.module';
 import { TestService } from './test.service';
 
-describe('CategoryController (Integration)', () => {
+describe('CategoryController', () => {
   let app: INestApplication;
   let testService: TestService;
 
