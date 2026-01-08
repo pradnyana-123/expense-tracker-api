@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpCode,
   Param,
@@ -47,6 +48,17 @@ export class ExpenseController {
       expenseId,
       data,
     );
+
+    return result;
+  }
+
+  @Delete(':userId/:expenseId')
+  @HttpCode(200)
+  async delete(
+    @Param('userId', ParseIntPipe) userId: number,
+    @Param('expenseId', ParseIntPipe) expenseId: number,
+  ) {
+    const result = await this.expenseService.deleteExpense(userId, expenseId);
 
     return result;
   }

@@ -356,4 +356,155 @@ describe('ExpenseController', () => {
         .expect(400);
     });
   });
+
+  describe('DELETE /api/expense/:userId/:expenseId', () => {
+    beforeEach(async () => {
+      await testService.deleteAll();
+    });
+
+    it('should delete expense successfully', async () => {
+      // Create user and expense
+      const userResponse = await request(app.getHttpServer())
+        .post('/api/users')
+        .send({
+          username: 'testuser',
+          password: 'password123',
+        });
+
+      const userId = userResponse.body.id;
+
+      const expenseResponse = await request(app.getHttpServer())
+        .post(`/api/expense/${userId}`)
+        .send({
+          description: 'Expense to delete',
+          amount: '100.00',
+        });
+
+      const expenseId = expenseResponse.body.id;
+
+      // Delete expense
+      const response = await request(app.getHttpServer())
+        .delete(`/api/expense/${userId}/${expenseId}`)
+        .expect(200);
+
+      expect(response.body.message).toBe('Expense deleted successfully');
+      // Verify expense is deleted
+      await request(app.getHttpServer())
+        .patch(`/api/expense/${userId}/${expenseId}`)
+        .send({
+          description: 'Should fail',
+          amount: '50.00',
+        })
+        .expect(404);
+    });
+
+    it('should return 404 for non-existent expense', async () => {
+      const userResponse = await request(app.getHttpServer())
+        .post('/api/users')
+        .send({
+          username: 'testuser',
+          password: 'password123',
+        });
+
+      const userId = userResponse.body.id;
+
+      await request(app.getHttpServer())
+        .delete(`/api/expense/${userId}/99999`)
+        .expect(404);
+    });
+
+    it('should return 403 when deleting other user expense', async () => {
+      // Create two users
+      const user1Response = await request(app.getHttpServer())
+        .post('/api/users')
+        .send({
+          username: 'user1',
+          password: 'password123',
+        });
+
+      const user2Response = await request(app.getHttpServer())
+        .post('/api/users')
+        .send({
+          username: 'user2',
+          password: 'password123',
+        });
+
+      const user1Id = user1Response.body.id;
+      const user2Id = user2Response.body.id;
+
+      // Create expense for user1
+      const expenseResponse = await request(app.getHttpServer())
+        .post(`/api/expense/${user1Id}`)
+        .send({
+          description: 'User1 expense',
+          amount: '100.00',
+        });
+
+      const expenseId = expenseResponse.body.id;
+
+      // Try to delete user1's expense with user2's ID
+      await request(app.getHttpServer())
+        .delete(`/api/expense/${user2Id}/${expenseId}`)
+        .expect(403);
+
+      // Verify expense still exists for user1
+      await request(app.getHttpServer())
+        .patch(`/api/expense/${user1Id}/${expenseId}`)
+        .send({
+          description: 'Should work',
+          amount: '150.00',
+        })
+        .expect(200);
+    });
+
+    it('should return 400 for invalid userId or expenseId', async () => {
+      await request(app.getHttpServer())
+        .delete('/api/expense/invalid/1')
+        .expect(400);
+
+      await request(app.getHttpServer())
+        .delete('/api/expense/1/invalid')
+        .expect(400);
+    });
+
+    it('should verify expense is actually deleted from database', async () => {
+      // Create user and expense
+      const userResponse = await request(app.getHttpServer())
+        .post('/api/users')
+        .send({
+          username: 'testuser',
+          password: 'password123',
+        });
+
+      const userId = userResponse.body.id;
+
+      const expenseResponse = await request(app.getHttpServer())
+        .post(`/api/expense/${userId}`)
+        .send({
+          description: 'Expense to delete',
+          amount: '100.00',
+        });
+
+      const expenseId = expenseResponse.body.id;
+
+      // Verify expense exists in getAll
+      const getAllBefore = await request(app.getHttpServer())
+        .get(`/api/expense/${userId}`)
+        .expect(200);
+
+      expect(getAllBefore.body).toHaveLength(1);
+
+      // Delete expense
+      await request(app.getHttpServer())
+        .delete(`/api/expense/${userId}/${expenseId}`)
+        .expect(200);
+
+      // Verify expense is gone from getAll
+      const getAllAfter = await request(app.getHttpServer())
+        .get(`/api/expense/${userId}`)
+        .expect(200);
+
+      expect(getAllAfter.body).toHaveLength(0);
+    });
+  });
 });

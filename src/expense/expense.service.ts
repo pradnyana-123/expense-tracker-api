@@ -94,4 +94,33 @@ export class ExpenseService {
 
     return expense;
   }
+
+  async deleteExpense(userId: number, expenseId: number) {
+    const expenseExistOrNot = await this.prisma.expense.findUnique({
+      where: { id: expenseId },
+    });
+
+    if (!expenseExistOrNot) {
+      throw new NotFoundException('Expense not found');
+    }
+
+    if (expenseExistOrNot.userId !== userId) {
+      throw new ForbiddenException(
+        'You are not allowed to update this expense',
+      );
+    }
+
+    await this.prisma.expense.delete({
+      where: { id: expenseId, userId },
+      select: {
+        id: true,
+        description: true,
+        amount: true,
+      },
+    });
+
+    return {
+        message: "Expense deleted successfully"
+    };
+  }
 }
