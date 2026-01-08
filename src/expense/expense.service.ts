@@ -35,4 +35,18 @@ export class ExpenseService {
 
     return expense;
   }
+
+  async getAllExpenses(userId: number) {
+    const userExistOrNot = await this.prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!userExistOrNot) {
+      throw new NotFoundException('User not found');
+    }
+
+    return this.prisma.expense.findMany({
+      where: { userId },
+    });
+  }
 }
