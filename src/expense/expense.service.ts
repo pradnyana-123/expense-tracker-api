@@ -1,7 +1,13 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from 'src/common/prisma.service';
 import { CreateExpenseDTO } from 'src/dto/create-expense.dto';
 import { Prisma } from '../../generated/prisma/browser';
+import { UpdateExpenseDTO } from 'src/dto/update-expense.dto';
+import { Decimal } from '../../generated/prisma/internal/prismaNamespace';
 @Injectable()
 export class ExpenseService {
   constructor(private prisma: PrismaService) {}
@@ -34,5 +40,87 @@ export class ExpenseService {
     });
 
     return expense;
+  }
+
+  async getAllExpenses(userId: number) {
+    const userExistOrNot = await this.prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!userExistOrNot) {
+      throw new NotFoundException('User not found');
+    }
+
+    return this.prisma.expense.findMany({
+      where: { userId },
+    });
+  }
+
+  async updateExpense(
+    userId: number,
+    expenseId: number,
+    data: UpdateExpenseDTO,
+  ) {
+    const expenseExistOrNot = await this.prisma.expense.findUnique({
+      where: { id: expenseId },
+    });
+
+    if (!expenseExistOrNot) {
+      throw new NotFoundException('Expense not found');
+    }
+
+    if (expenseExistOrNot.userId !== userId) {
+      throw new ForbiddenException(
+        'You are not allowed to update this expense',
+      );
+    }
+
+    const expense = await this.prisma.expense.update({
+      where: { id: expenseId },
+      data: {
+        ...data,
+        ...(data.amount !== undefined && {
+          amount: new Prisma.Decimal(
+            data.amount.replace(/\./g, '').replace(',', '.'),
+          ),
+        }),
+      },
+      select: {
+        id: true,
+        description: true,
+        amount: true,
+      },
+    });
+
+    return expense;
+  }
+
+  async deleteExpense(userId: number, expenseId: number) {
+    const expenseExistOrNot = await this.prisma.expense.findUnique({
+      where: { id: expenseId },
+    });
+
+    if (!expenseExistOrNot) {
+      throw new NotFoundException('Expense not found');
+    }
+
+    if (expenseExistOrNot.userId !== userId) {
+      throw new ForbiddenException(
+        'You are not allowed to update this expense',
+      );
+    }
+
+    await this.prisma.expense.delete({
+      where: { id: expenseId, userId },
+      select: {
+        id: true,
+        description: true,
+        amount: true,
+      },
+    });
+
+    return {
+        message: "Expense deleted successfully"
+    };
   }
 }

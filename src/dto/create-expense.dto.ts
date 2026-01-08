@@ -7,5 +7,6 @@ export class CreateExpenseDTO {
 
   @IsString()
   @IsDecimal({ decimal_digits: '2' })
+  @IsNotEmpty()
   amount: string;
 }
