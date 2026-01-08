@@ -3,10 +3,10 @@ import {
   ForbiddenException,
   Injectable,
   NotFoundException,
-} from '@nestjs/common';
-import { PrismaService } from 'src/common/prisma.service';
-import { CreateCategoryDTO } from 'src/dto/create-category.dto';
-import { UpdateCategoryDTO } from 'src/dto/update-category.dto';
+} from "@nestjs/common";
+import { PrismaService } from "src/common/prisma.service";
+import { CreateCategoryDTO } from "src/dto/create-category.dto";
+import { UpdateCategoryDTO } from "src/dto/update-category.dto";
 
 @Injectable()
 export class CategoryService {
@@ -21,7 +21,7 @@ export class CategoryService {
     });
 
     if (categoryExist) {
-      throw new BadRequestException('Category already exists');
+      throw new BadRequestException("Category already exists");
     }
 
     const category = await this.prisma.category.create({
@@ -56,12 +56,12 @@ export class CategoryService {
     });
 
     if (!categoryExistOrNot) {
-      throw new NotFoundException('Category not found');
+      throw new NotFoundException("Category not found");
     }
 
     if (categoryExistOrNot.userId !== userId) {
       throw new ForbiddenException(
-        'You are not allowed to update this category',
+        "You are not allowed to update this category",
       );
     }
 
@@ -85,12 +85,12 @@ export class CategoryService {
     });
 
     if (!categoryExistOrNot) {
-      throw new NotFoundException('Category not found');
+      throw new NotFoundException("Category not found");
     }
 
     if (categoryExistOrNot.userId !== userId) {
       throw new ForbiddenException(
-        'You are not allowed to delete this category',
+        "You are not allowed to delete this category",
       );
     }
 
@@ -99,7 +99,7 @@ export class CategoryService {
     });
 
     return {
-      message: 'Category deleted successfully',
+      message: "Category deleted successfully",
     };
   }
 }

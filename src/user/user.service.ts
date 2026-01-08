@@ -1,7 +1,7 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
-import { PrismaService } from 'src/common/prisma.service';
-import { CreateUserDTO } from 'src/dto/create-user-dto';
-import * as bcrypt from 'bcrypt';
+import { BadRequestException, Injectable } from "@nestjs/common";
+import { PrismaService } from "src/common/prisma.service";
+import { CreateUserDTO } from "src/dto/create-user-dto";
+import * as bcrypt from "bcrypt";
 
 @Injectable()
 export class UserService {
@@ -15,7 +15,7 @@ export class UserService {
     });
 
     if (userExistOrNot) {
-      throw new BadRequestException('User already exists');
+      throw new BadRequestException("User already exists");
     }
 
     const hashedPassword = await bcrypt.hash(dto.password, 10);
