@@ -39,9 +39,8 @@ export class CategoryService {
       where: {
         userId: userId,
       },
-      select: {
-        id: true,
-        name: true,
+      include: {
+        expenses: true,
       },
     });
   }
