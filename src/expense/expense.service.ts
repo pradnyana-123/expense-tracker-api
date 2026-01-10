@@ -2,11 +2,11 @@ import {
   ForbiddenException,
   Injectable,
   NotFoundException,
-} from '@nestjs/common';
-import { PrismaService } from 'src/common/prisma.service';
-import { CreateExpenseDTO } from 'src/dto/create-expense.dto';
-import { Prisma } from '../../generated/prisma/browser';
-import { UpdateExpenseDTO } from 'src/dto/update-expense.dto';
+} from "@nestjs/common";
+import { PrismaService } from "src/common/prisma.service";
+import { CreateExpenseDTO } from "src/dto/create-expense.dto";
+import { Prisma } from "../../generated/prisma/browser";
+import { UpdateExpenseDTO } from "src/dto/update-expense.dto";
 @Injectable()
 export class ExpenseService {
   constructor(private prisma: PrismaService) {}
@@ -21,7 +21,7 @@ export class ExpenseService {
     }
 
     const normalizedAmount = new Prisma.Decimal(
-      data.amount.replace(/\./g, '').replace(',', '.'),
+      data.amount.replace(/\./g, "").replace(",", "."),
     );
 
     const expense = await this.prisma.expense.create({
@@ -80,7 +80,7 @@ export class ExpenseService {
         ...data,
         ...(data.amount !== undefined && {
           amount: new Prisma.Decimal(
-            data.amount.replace(/\./g, '').replace(',', '.'),
+            data.amount.replace(/\./g, "").replace(",", "."),
           ),
         }),
       },
@@ -105,7 +105,7 @@ export class ExpenseService {
 
     if (expenseExistOrNot.userId !== userId) {
       throw new ForbiddenException(
-       "You are not allowed to update this expense",
+        "You are not allowed to update this expense",
       );
     }
 
@@ -119,7 +119,54 @@ export class ExpenseService {
     });
 
     return {
-        message: "Expense deleted successfully"
+      message: "Expense deleted successfully",
+    };
+  }
+
+  async assignExpense(userId: number, expenseId: number, categoryId: number) {
+    const expenseExistOrNot = await this.prisma.expense.findUnique({
+      where: { id: expenseId },
+    });
+
+    if (!expenseExistOrNot) {
+      throw new NotFoundException("Expense not found");
+    }
+
+    if (expenseExistOrNot.userId !== userId) {
+      throw new ForbiddenException(
+        "You are not allowed to assign this expense",
+      );
+    }
+
+    const existingCategory = await this.prisma.category.findUnique({
+      where: { id: categoryId },
+    });
+
+    if (!existingCategory) {
+      throw new NotFoundException("Category not found");
+    }
+
+    if (existingCategory.userId !== userId) {
+      throw new ForbiddenException(
+        "You are not allowed to modify this category",
+      );
+    }
+
+    await this.prisma.expense.update({
+      where: { id: expenseId },
+      data: {
+        categoryId,
+        userId,
+      },
+      select: {
+        id: true,
+        description: true,
+        amount: true,
+      },
+    });
+
+    return {
+      message: "Expense assigned successfully",
     };
   }
 }
