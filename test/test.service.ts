@@ -1,5 +1,5 @@
-import { Injectable } from '@nestjs/common';
-import { PrismaService } from 'src/common/prisma.service';
+import { Injectable } from "@nestjs/common";
+import { PrismaService } from "src/common/prisma.service";
 
 @Injectable()
 export class TestService {
@@ -13,12 +13,12 @@ export class TestService {
 
   async deleteExpense() {
     await this.prisma.expense.deleteMany({
-      where: { description: 'test description' },
+      where: { description: "test description" },
     });
   }
 
   async createUser(userData: { username: string; password: string }) {
-    const bcrypt = require('bcrypt');
+    const bcrypt = require("bcrypt");
     const hashedPassword = await bcrypt.hash(userData.password, 10);
 
     // Create unique username to avoid conflicts

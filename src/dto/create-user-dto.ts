@@ -1,10 +1,10 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsString, Length } from 'class-validator';
+import { ApiProperty } from "@nestjs/swagger";
+import { IsNotEmpty, IsString, Length } from "class-validator";
 
 export class CreateUserDTO {
   @ApiProperty({
-    type: 'string',
-    description: 'The property for username',
+    type: "string",
+    description: "The property for username",
     minimum: 1,
     default: 100,
   })

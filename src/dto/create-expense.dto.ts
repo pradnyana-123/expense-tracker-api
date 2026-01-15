@@ -1,4 +1,4 @@
-import { IsDecimal, IsNotEmpty, IsString } from 'class-validator';
+import { IsDecimal, IsNotEmpty, IsString } from "class-validator";
 
 export class CreateExpenseDTO {
   @IsString()
@@ -6,7 +6,7 @@ export class CreateExpenseDTO {
   description: string;
 
   @IsString()
-  @IsDecimal({ decimal_digits: '2' })
+  @IsDecimal({ decimal_digits: "2" })
   @IsNotEmpty()
   amount: string;
 }

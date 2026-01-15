@@ -3,11 +3,11 @@ import {
   InternalServerErrorException,
   OnModuleDestroy,
   OnModuleInit,
-} from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { PrismaClient } from '../../generated/prisma/client';
-import { PrismaPg } from '@prisma/adapter-pg';
-import { Prisma } from '../../generated/prisma/browser';
+} from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
+import { PrismaClient } from "../../generated/prisma/client";
+import { PrismaPg } from "@prisma/adapter-pg";
+import { Prisma } from "../../generated/prisma/browser";
 
 @Injectable()
 export class PrismaService
@@ -16,32 +16,32 @@ export class PrismaService
 {
   constructor(private readonly configService: ConfigService) {
     try {
-      const connectionString = configService.get<string>('DATABASE_URL');
+      const connectionString = configService.get<string>("DATABASE_URL");
       const adapter = new PrismaPg({ connectionString });
 
       super({
         adapter,
         log: [
-          { emit: 'event', level: 'query' },
-          { emit: 'event', level: 'warn' },
-          { emit: 'event', level: 'info' },
-          { emit: 'event', level: 'error' },
+          { emit: "event", level: "query" },
+          { emit: "event", level: "warn" },
+          { emit: "event", level: "info" },
+          { emit: "event", level: "error" },
         ],
       });
 
-      (this as any).$on('query', (e: Prisma.QueryEvent) => {
+      (this as any).$on("query", (e: Prisma.QueryEvent) => {
         console.log(`[QUERY] ${e.query}`);
       });
 
-      (this as any).$on('info', (e: Prisma.QueryEvent) => {
+      (this as any).$on("info", (e: Prisma.QueryEvent) => {
         console.log(`[INFO] ${e.query}`);
       });
 
-      (this as any).$on('warn', (e: Prisma.QueryEvent) => {
+      (this as any).$on("warn", (e: Prisma.QueryEvent) => {
         console.log(`[WARN] ${e.query}`);
       });
 
-      (this as any).$on('error', (e: Prisma.QueryEvent) => {
+      (this as any).$on("error", (e: Prisma.QueryEvent) => {
         console.log(`[ERROR] ${e.query}`);
       });
     } catch (err) {
