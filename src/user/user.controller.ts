@@ -1,8 +1,18 @@
-import { Body, Controller, Get, HttpCode, Post } from "@nestjs/common";
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  Post,
+  UseGuards,
+} from "@nestjs/common";
 import { CreateUserDTO } from "src/dto/create-user-dto";
 import { UserService } from "./user.service";
+import { RateLimitGuard } from "src/guards/rate-limit.guard";
+import { RateLimit } from "src/common/rate-limit.decorator";
 
 @Controller("api/users")
+@UseGuards(RateLimitGuard)
 export class UserController {
   constructor(private userService: UserService) {}
 
@@ -15,6 +25,7 @@ export class UserController {
   }
 
   @Get()
+  @RateLimit(10, 60)
   async getAll() {
     const result = await this.userService.getUsers();
 
