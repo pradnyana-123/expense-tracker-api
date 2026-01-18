@@ -18,11 +18,6 @@ import { AuthGuard } from "./guards/auth.guard";
     ExpenseModule,
   ],
   controllers: [],
-  providers: [
-    {
-      provide: APP_GUARD,
-      useClass: AuthGuard,
-    },
-  ],
+  providers: [],
 })
 export class AppModule {}
