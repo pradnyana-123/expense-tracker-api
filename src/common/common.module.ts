@@ -1,11 +1,19 @@
-import { Global, Module } from "@nestjs/common";
+import { Global, Module, OnModuleDestroy, Inject } from "@nestjs/common";
 import { PrismaService } from "./prisma.service";
-
-export const REDIS_CLIENT = "REDIS_CLIENT";
 import Redis from "ioredis";
 import { RateLimitService } from "./rate-limit.service";
+import { REDIS_CLIENT } from "./constants";
+import { JwtModule } from "@nestjs/jwt";
 @Global()
 @Module({
+  imports: [
+    JwtModule.register({
+      secret: "supersecret123",
+      signOptions: {
+        expiresIn: "7D",
+      },
+    }),
+  ],
   providers: [
     PrismaService,
     {
@@ -24,15 +32,17 @@ import { RateLimitService } from "./rate-limit.service";
           console.log("There's an error while connecting to redis: ", err);
         });
 
-        (redis as any).onModuleDestroy = async () => {
-          await redis.disconnect();
-        };
-
         return redis;
       },
     },
     RateLimitService,
   ],
-  exports: [PrismaService, RateLimitService, REDIS_CLIENT],
+  exports: [PrismaService, RateLimitService, JwtModule, REDIS_CLIENT],
 })
-export class CommonModule {}
+export class CommonModule implements OnModuleDestroy {
+  constructor(@Inject(REDIS_CLIENT) private redis: Redis) {}
+
+  async onModuleDestroy() {
+    await this.redis.disconnect();
+  }
+}

@@ -4,6 +4,8 @@ import { ConfigModule } from "@nestjs/config";
 import { UserModule } from "./user/user.module";
 import { CategoryModule } from "./category/category.module";
 import { ExpenseModule } from "./expense/expense.module";
+import { APP_GUARD } from "@nestjs/core";
+import { AuthGuard } from "./guards/auth.guard";
 @Module({
   imports: [
     CommonModule,
@@ -16,6 +18,11 @@ import { ExpenseModule } from "./expense/expense.module";
     ExpenseModule,
   ],
   controllers: [],
-  providers: [],
+  providers: [
+    {
+      provide: APP_GUARD,
+      useClass: AuthGuard,
+    },
+  ],
 })
 export class AppModule {}
