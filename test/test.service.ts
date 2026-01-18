@@ -21,13 +21,9 @@ export class TestService {
     const bcrypt = require("bcrypt");
     const hashedPassword = await bcrypt.hash(userData.password, 10);
 
-    // Create unique username to avoid conflicts
-    const uniqueUsername = `${userData.username}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-
     return this.prisma.user.create({
       data: {
         ...userData,
-        username: uniqueUsername,
         password: hashedPassword,
       },
     });

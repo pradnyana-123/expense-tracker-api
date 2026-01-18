@@ -2,10 +2,9 @@ import { Test, TestingModule } from "@nestjs/testing";
 import { INestApplication, ValidationPipe } from "@nestjs/common";
 import * as request from "supertest";
 import { AppModule } from "../src/app.module";
-import { CreateUserDTO } from "src/dto/create-user-dto";
 import { TestModule } from "./test.module";
 import { TestService } from "./test.service";
-
+import cookieParser from "cookie-parser";
 describe("UserController", () => {
   let app: INestApplication;
   let testService: TestService;
@@ -17,6 +16,9 @@ describe("UserController", () => {
     app = moduleFixture.createNestApplication();
     app.useGlobalPipes(new ValidationPipe());
     testService = moduleFixture.get<TestService>(TestService);
+
+    app.use(cookieParser());
+
     await app.init();
   });
 
@@ -29,71 +31,133 @@ describe("UserController", () => {
       await testService.deleteAll();
     });
 
-    it("should successfully create a new user and return 201", async () => {
-      const payload: CreateUserDTO = {
-        username: "test user",
-        password: "securePassword123",
-      };
-
+    it("should register user successfully", async () => {
       const response = await request
         .default(app.getHttpServer())
         .post("/api/users")
-        .send(payload);
+        .send({
+          username: "testuser",
+          password: "password123",
+        });
 
       expect(response.status).toBe(201);
-      expect(response.body.id).toBeDefined();
-      expect(response.body.username).toBe("test user");
+      expect(response.body.username).toBe("testuser");
+      expect(response.body.password).toBeUndefined();
     });
 
-    it("should return 400 Bad Request if payload is invalid", async () => {
-      const invalidPayload = {
-        username: "",
-        password: "",
-      };
-
+    it("should return validation error for missing username", async () => {
       const response = await request
         .default(app.getHttpServer())
         .post("/api/users")
-        .send(invalidPayload);
+        .send({
+          password: "password123",
+        });
 
       expect(response.status).toBe(400);
-      expect(response.body).toBeDefined();
+    });
+
+    it("should return validation error for missing password", async () => {
+      const response = await request
+        .default(app.getHttpServer())
+        .post("/api/users")
+        .send({
+          username: "testuser",
+        });
+
+      expect(response.status).toBe(400);
+    });
+  });
+
+  describe("POST /api/users/login", () => {
+    beforeEach(async () => {
+      await testService.deleteAll();
+      await testService.createUser({
+        username: "testuser",
+        password: "password123",
+      });
+    });
+
+    it("should login user successfully", async () => {
+      const response = await request
+        .default(app.getHttpServer())
+        .post("/api/users/login")
+        .send({
+          username: "testuser",
+          password: "password123",
+        });
+
+      expect(response.status).toBe(200);
+      expect(response.body.message).toBe("Login successfull");
+      expect(response.headers["set-cookie"]).toBeDefined();
+    });
+
+    it("should return error for invalid credentials", async () => {
+      const response = await request
+        .default(app.getHttpServer())
+        .post("/api/users/login")
+        .send({
+          username: "testuser",
+          password: "wrongpassword",
+        });
+
+      expect(response.status).toBe(401);
+    });
+
+    it("should return error for non-existent user", async () => {
+      const response = await request
+        .default(app.getHttpServer())
+        .post("/api/users/login")
+        .send({
+          username: "nonexistent",
+          password: "password123",
+        });
+
+      expect(response.status).toBe(404);
     });
   });
 
   describe("GET /api/users", () => {
     beforeEach(async () => {
       await testService.deleteAll();
-    });
-
-    it("should return users successfully", async () => {
-      // Create test data
       await testService.createUser({
-        username: "user1",
+        username: "testuser",
         password: "password123",
       });
-      await testService.createUser({
-        username: "user2",
-        password: "password456",
-      });
+    });
+
+    it("should return users successfully with authentication", async () => {
+      // First login to get token
+      const loginResponse = await request
+        .default(app.getHttpServer())
+        .post("/api/users/login")
+        .send({
+          username: "testuser",
+          password: "password123",
+        });
+
+      const token = loginResponse.headers["set-cookie"][0].split(";")[0];
+
+      console.log("Token: ", token);
 
       const response = await request
         .default(app.getHttpServer())
-        .get("/api/users");
+        .get("/api/users")
+        .set("Cookie", token);
+
+      console.log("Response Body: ", response.body);
 
       expect(response.status).toBe(200);
       expect(Array.isArray(response.body)).toBe(true);
-      expect(response.body.length).toBe(2);
-      expect(response.body[0].username).toMatch(/user1|user2/);
+      expect(response.body.length).toBe(1);
+      expect(response.body[0].username).toBe("testuser");
     });
 
-    it("should return empty array when no users exist", async () => {
+    it("should return unauthorized without authentication", async () => {
       const response = await request
         .default(app.getHttpServer())
         .get("/api/users");
 
-      expect(response.status).toBe(200);
-      expect(response.body).toEqual([]);
+      expect(response.status).toBe(401);
     });
   });
 });
