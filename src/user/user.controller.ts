@@ -13,7 +13,7 @@ import { RateLimitGuard } from "src/guards/rate-limit.guard";
 import { RateLimit } from "src/common/rate-limit.decorator";
 import { LoginUserDTO } from "src/dto/login-user.dto";
 import { Response } from "express";
-import { Public } from "src/common/auth.decorator";
+import { Public } from "src/common/public.decorator";
 import { AuthGuard } from "src/guards/auth.guard";
 
 @Controller("api/users")
